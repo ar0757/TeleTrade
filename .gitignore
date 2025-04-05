@@ -1,0 +1,6 @@
+data/session_name.session
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+assets/temp_popup.png
