@@ -1,4 +1,5 @@
 data/session_name.session
+data/secrets.csv
 __pycache__/
 *.pyc
 *.pyo
