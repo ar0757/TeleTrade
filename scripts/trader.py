@@ -167,24 +167,31 @@ def place_trade(direction: str) -> None:
 
 def wait_until_trade_time(trade_time_str: str, message_timezone: str = "Etc/GMT+3") -> None:
     """Waits until the specified trade time (in message timezone) before proceeding."""
-    trade_time = datetime.strptime(trade_time_str, "%H:%M")
-    now = datetime.now()
-    trade_date = now.date()
-    trade_datetime = datetime.combine(trade_date, trade_time.time())
+    trade_time_dt = datetime.strptime(trade_time_str, "%H:%M")
+    trade_time = trade_time_dt.time()  # Extract the time part (e.g., 20:30:00)
+
+    # Get the current time in the message timezone (UTC-3)
     message_tz = pytz.timezone(message_timezone)
-    trade_datetime = message_tz.localize(trade_datetime)
-    trade_datetime_utc = trade_datetime.astimezone(pytz.UTC)
     now_utc = datetime.now(pytz.UTC)
-    wait_seconds = (trade_datetime_utc - now_utc).total_seconds()
+    now_in_message_tz = now_utc.astimezone(message_tz)
+
+    # Combine the trade time with the current date in message timezone
+    trade_date = now_in_message_tz.date()
+    trade_datetime = datetime.combine(trade_date, trade_time)
+    trade_datetime = message_tz.localize(trade_datetime)
+
+    # Calculate the delta between the trade time and the current time
+    delta_seconds = (trade_datetime - now_in_message_tz).total_seconds()
     
     UI_ACTION_TIME = 1.0  # Total time for modify_trade_amount (5 * 0.2 seconds)
-    if wait_seconds <= 0:
+    if delta_seconds <= 0:
         print(f"Trade time {trade_time_str} (UTC-3) is in the past. Executing trade immediately.")
     else:
+        trade_datetime_utc = trade_datetime.astimezone(pytz.UTC)
         print(f"Current time (UTC): {now_utc.strftime('%H:%M:%S')}")
         print(f"Trade time (UTC-3): {trade_time_str}, which is {trade_datetime_utc.strftime('%H:%M:%S')} UTC")
-        print(f"Waiting for {wait_seconds:.0f} seconds until trade time...")
-        time.sleep(max(0, wait_seconds - UI_ACTION_TIME))
+        print(f"Waiting for {delta_seconds:.0f} seconds until trade time...")
+        time.sleep(max(0, delta_seconds - UI_ACTION_TIME))
 
 def execute_trade_sequence(direction: str, max_attempts: int = 3) -> None:
     """Executes a trade sequence with retries on loss, keeping the same direction."""

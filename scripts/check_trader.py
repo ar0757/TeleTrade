@@ -4,10 +4,19 @@
 #     print(pyautogui.position())
 
 from trader import execute_trade_with_parameters
+from datetime import datetime, timedelta
+import pytz
+
+now_utc = datetime.now(pytz.UTC)
+message_tz = pytz.timezone("Etc/GMT+3")
+now_in_message_tz = now_utc.astimezone(message_tz)
+
+# Set trade time to 2 minutes from now
+trade_time_dt = now_in_message_tz + timedelta(minutes=2)
+trade_time = trade_time_dt.strftime("%H:%M")
 
 trading_pair = "CAD/JPY"
-trade_time = "06:35"  # In UTC-3
-direction = "buy"
+direction = "sell"
 
 # Execute the trade
 success = execute_trade_with_parameters(trading_pair, trade_time, direction)
