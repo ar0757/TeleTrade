@@ -12,7 +12,7 @@ with open('data/secrets.csv', mode='r') as file:
     header = next(reader)
     row = next(reader)
 
-channel = 0 # Replace with the telegram channel ID 
+channel = -1002087162312 # Replace with the telegram channel ID 
 
 api_id, api_hash, phone_number = row
 client = TelegramClient('data/session_name', api_id, api_hash)
@@ -66,6 +66,9 @@ async def handler(event):
     message = event.message
     text = message.text
     
+    print(f"New message in channel: {message}")
+    print(f"Received Text: {text}")
+
     if not text or not is_relevant_message(text):
         return
     
